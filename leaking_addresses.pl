@@ -171,21 +171,36 @@ sub push_to_global
 # True if argument potentially contains a kernel address.
 sub may_leak_address
 {
-	my ($line) = @_;
+        my ($line) = @_;
 
-	# Ignore false positives.
-	if ($line =~ '\b(0x)?(f|F){16}\b' or
-		$line =~ '\b(0x)?0{16}\b' or
-		$line =~ '\bKEY=[[:xdigit:]]{14} [[:xdigit:]]{16} [[:xdigit:]]{16}\b') {
+        if ($line =~ '\b(0x)?(f|F){16}\b' or
+                $line =~ '\b(0x)?0{16}\b') {
+                return 0;
+        }
+
+        if ($line =~ '\bKEY=[[:xdigit:]]{14} [[:xdigit:]]{16} [[:xdigit:]]{16}\b' or
+            $line =~ '\b[[:xdigit:]]{14} [[:xdigit:]]{16} [[:xdigit:]]{16}\b') {
 		return 0;
-	}
+        }
 
-	# Potential kernel address.
-	if ($line =~ '\b(0x)?ffff[[:xdigit:]]{12}\b') {
+        # vsyscall memory region, we should probably check against a range here
+        if ($line =~ '\bf{10}600000\b' or
+            $line =~ '\bf{10}601000\b') {
+                return 0;
+        }
+
+        # Signal masks.
+        if ($line =~ '^SigBlk:' or
+            $line =~ '^SigCgt:') {
+                return 0;
+        }
+
+        # Potential kernel address.
+        if ($line =~ '\b(0x)?ffff[[:xdigit:]]{12}\b') {
 		return 1;
-	}
+        }
 
-	return 0;
+        return 0;
 }
 
 sub parse_dmesg
