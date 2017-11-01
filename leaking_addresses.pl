@@ -55,36 +55,36 @@ my @dont_parse = ();
 
 # Do not parse these files (absolute path).
 my @skip_parse_files_abs = ('/proc/kmsg',
-                            '/proc/kcore',
-                            '/proc/fs/ext4/sdb1/mb_groups',
-                            '/proc/1/fd/3',
-                            '/sys/kernel/debug/tracing/trace_pipe',
-                            '/sys/kernel/security/apparmor/revision');
+			    '/proc/kcore',
+			    '/proc/fs/ext4/sdb1/mb_groups',
+			    '/proc/1/fd/3',
+			    '/sys/kernel/debug/tracing/trace_pipe',
+			    '/sys/kernel/security/apparmor/revision');
 
 # Do not parse thes files under any subdirectory.
 my @skip_parse_files_any = ('0',
-                            '1',
-                            '2',
-                            'pagemap',
-                            'events',
-                            'access',
-                            'registers',
-                            'snapshot_raw',
-                            'trace_pipe_raw',
-                            'ptmx',
-                            'trace_pipe');
+			    '1',
+			    '2',
+			    'pagemap',
+			    'events',
+			    'access',
+			    'registers',
+			    'snapshot_raw',
+			    'trace_pipe_raw',
+			    'ptmx',
+			    'trace_pipe');
 
 # Do not walk these directories (absolute path).
 my @skip_walk_dirs_abs = ();
 
 # Do not walk these directories under any subdirectory.
 my @skip_walk_dirs_any = ('self',
-                          'thread-self',
-                          'cwd',
-                          'fd',
-                          'stderr',
-                          'stdin',
-                          'stdout');
+			  'thread-self',
+			  'cwd',
+			  'fd',
+			  'stderr',
+			  'stdin',
+			  'stdout');
 
 sub help
 {
@@ -96,10 +96,10 @@ Version: $V
 
 Options:
 
-      --dont-walk=<dir>      Don't walk tree starting at <dir>.
-      --dont-parse=<file>    Don't parse <file>.
-  -d, --debug                Display debugging output.
-  -h, --help, --version      Display this help and exit.
+	--dont-walk=<dir>      Don't walk tree starting at <dir>.
+	--dont-parse=<file>    Don't parse <file>.
+	-d, --debug                Display debugging output.
+	-h, --help, --version      Display this help and exit.
 
 If an absolute path is passed to --dont_XXX then this path is skipped. If a
 single filename is passed then this file/directory will be skipped when
@@ -107,8 +107,8 @@ appearing under any subdirectory.
 
 Example:
 
-    # Just scan dmesg output.
-    scripts/leaking_addresses.pl --dont_walk_abs /proc --dont_walk_abs /sys
+	# Just scan dmesg output.
+	scripts/leaking_addresses.pl --dont_walk_abs /proc --dont_walk_abs /sys
 
 Scans the running (64 bit) kernel for potential leaking addresses.
 
@@ -122,7 +122,7 @@ GetOptions(
 	'd|debug'		=> \$debug,
 	'h|help'		=> \$help,
 	'version'		=> \$help
-    ) or help(1);
+) or help(1);
 
 help(0) if ($help);
 
@@ -135,10 +135,10 @@ exit 0;
 
 sub debug_arrays
 {
-        print 'dirs_any: ' . join(", ", @skip_walk_dirs_any) . "\n";
-        print 'dirs_abs: ' . join(", ", @skip_walk_dirs_abs) . "\n";
-        print 'parse_any: ' . join(", ", @skip_parse_files_any) . "\n";
-        print 'parse_abs: ' . join(", ", @skip_parse_files_abs) . "\n";
+	print 'dirs_any: ' . join(", ", @skip_walk_dirs_any) . "\n";
+	print 'dirs_abs: ' . join(", ", @skip_walk_dirs_abs) . "\n";
+	print 'parse_any: ' . join(", ", @skip_parse_files_any) . "\n";
+	print 'parse_abs: ' . join(", ", @skip_parse_files_abs) . "\n";
 }
 
 sub dprint
@@ -148,135 +148,135 @@ sub dprint
 
 sub push_in_abs_any
 {
-        my ($in, $abs, $any) = @_;
+	my ($in, $abs, $any) = @_;
 
-        foreach my $path (@$in) {
-                if (File::Spec->file_name_is_absolute($path)) {
-                        push @$abs, $path;
-                } elsif (index($path,'/') == -1) {
-                        push @$any, $path;
-                } else {
-                        print 'path error: ' . $path;
-                }
-        }
+	foreach my $path (@$in) {
+		if (File::Spec->file_name_is_absolute($path)) {
+			push @$abs, $path;
+		} elsif (index($path,'/') == -1) {
+			push @$any, $path;
+		} else {
+			print 'path error: ' . $path;
+		}
+	}
 }
 
 # Push command line options to global arrays.
 sub push_to_global
 {
-        push_in_abs_any(\@dont_walk, \@skip_walk_dirs_abs, \@skip_walk_dirs_any);
-        push_in_abs_any(\@dont_parse, \@skip_parse_files_abs, \@skip_parse_files_any);
+	push_in_abs_any(\@dont_walk, \@skip_walk_dirs_abs, \@skip_walk_dirs_any);
+	push_in_abs_any(\@dont_parse, \@skip_parse_files_abs, \@skip_parse_files_any);
 }
 
 # True if argument potentially contains a kernel address.
 sub may_leak_address
 {
-        my ($line) = @_;
+	my ($line) = @_;
 
-        # Ignore false positives.
-        if ($line =~ '\b(0x)?(f|F){16}\b' or
-            $line =~ '\b(0x)?0{16}\b' or
-            $line =~ '\bKEY=[[:xdigit:]]{14} [[:xdigit:]]{16} [[:xdigit:]]{16}\b') {
+	# Ignore false positives.
+	if ($line =~ '\b(0x)?(f|F){16}\b' or
+		$line =~ '\b(0x)?0{16}\b' or
+		$line =~ '\bKEY=[[:xdigit:]]{14} [[:xdigit:]]{16} [[:xdigit:]]{16}\b') {
 		return 0;
-        }
+	}
 
-        # Potential kernel address.
-        if ($line =~ '\b(0x)?ffff[[:xdigit:]]{12}\b') {
+	# Potential kernel address.
+	if ($line =~ '\b(0x)?ffff[[:xdigit:]]{12}\b') {
 		return 1;
-        }
+	}
 
-        return 0;
+	return 0;
 }
 
 sub parse_dmesg
 {
-        open my $cmd, '-|', 'dmesg';
-        while (<$cmd>) {
-                if (may_leak_address($_)) {
-                        print 'dmesg: ' . $_;
-                }
-        }
-        close $cmd;
+	open my $cmd, '-|', 'dmesg';
+	while (<$cmd>) {
+		if (may_leak_address($_)) {
+			print 'dmesg: ' . $_;
+		}
+	}
+	close $cmd;
 }
 
 # True if we should skip this path.
 sub skip
 {
-        my ($path, $paths_abs, $paths_any) = @_;
+	my ($path, $paths_abs, $paths_any) = @_;
 
-        foreach (@$paths_abs) {
-                return 1 if (/^$path$/);
-        }
+	foreach (@$paths_abs) {
+		return 1 if (/^$path$/);
+	}
 
-        my($filename, $dirs, $suffix) = fileparse($path);
-        foreach (@$paths_any) {
+	my($filename, $dirs, $suffix) = fileparse($path);
+	foreach (@$paths_any) {
 		return 1 if (/^$filename$/);
-        }
+	}
 
-        return 0;
+	return 0;
 }
 
 sub skip_parse
 {
-        my ($path) = @_;
-        return skip($path, \@skip_parse_files_abs, \@skip_parse_files_any);
+	my ($path) = @_;
+	return skip($path, \@skip_parse_files_abs, \@skip_parse_files_any);
 }
 
 sub parse_file
 {
-        my ($file) = @_;
+	my ($file) = @_;
 
-        if (! -R $file) {
-                return;
-        }
+	if (! -R $file) {
+		return;
+	}
 
-        if (skip_parse($file)) {
-                dprint "skipping file: $file\n";
-                return;
-        }
-        dprint "parsing: $file\n";
+	if (skip_parse($file)) {
+		dprint "skipping file: $file\n";
+		return;
+	}
+	dprint "parsing: $file\n";
 
-        open my $fh, "<", $file or return;
-        while ( <$fh> ) {
-                if (may_leak_address($_)) {
-                        print $file . ': ' . $_;
-                }
-        }
-        close $fh;
+	open my $fh, "<", $file or return;
+	while ( <$fh> ) {
+		if (may_leak_address($_)) {
+			print $file . ': ' . $_;
+		}
+	}
+	close $fh;
 }
 
 
 # True if we should skip walking this directory.
 sub skip_walk
 {
-        my ($path) = @_;
-        return skip($path, \@skip_walk_dirs_abs, \@skip_walk_dirs_any)
+	my ($path) = @_;
+	return skip($path, \@skip_walk_dirs_abs, \@skip_walk_dirs_any)
 }
 
 # Recursively walk directory tree.
 sub walk
 {
-        my @dirs = @_;
-        my %seen;
+	my @dirs = @_;
+	my %seen;
 
-        while (my $pwd = shift @dirs) {
-                next if (skip_walk($pwd));
-                next if (!opendir(DIR, $pwd));
-                my @files = readdir(DIR);
-                closedir(DIR);
+	while (my $pwd = shift @dirs) {
+		next if (skip_walk($pwd));
+		next if (!opendir(DIR, $pwd));
+		my @files = readdir(DIR);
+		closedir(DIR);
 
-                foreach my $file (@files) {
-                        next if ($file eq '.' or $file eq '..');
+		foreach my $file (@files) {
+			next if ($file eq '.' or $file eq '..');
 
-                        my $path = "$pwd/$file";
-                        next if (-l $path);
+			my $path = "$pwd/$file";
+			next if (-l $path);
 
-                        if (-d $path) {
+			if (-d $path) {
 				push @dirs, $path;
-                        } else {
+			} else {
 				parse_file($path);
-                        }
-                }
-        }
+			}
+		}
+	}
 }
 
