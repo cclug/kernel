@@ -53,7 +53,7 @@ my $debug = 0;
 my @dont_walk = ();
 my @dont_parse = ();
 
-# Do not parse these files (ablosute path).
+# Do not parse these files (absolute path).
 my @skip_parse_files_abs = ('/proc/kmsg',
                             '/proc/kcore',
                             '/proc/fs/ext4/sdb1/mb_groups',
